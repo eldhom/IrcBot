@@ -1,11 +1,4 @@
-<<<<<<< HEAD
-class IrcMessage:
-=======
-
-
-
 class IrcMsg:
->>>>>>> a763ab8c0c0a70e74905dcf9ac3f3889d7cc9b8b
 	def __init__(self, data):
 		self.type = data.split(' ')[1]
 		if self.type == 'PRIVMSG':

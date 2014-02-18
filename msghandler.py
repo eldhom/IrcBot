@@ -1,5 +1,4 @@
-
 class MsgHandler:
-	def __init__(self, function, msgs):
+	def __init__(self, function, msg):
 		self.function 	= function
-		self.msgs		= list(msgs)
+		self.msg		= msg

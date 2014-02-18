@@ -8,7 +8,6 @@ class IrcBot:
 		self.msg_handlers 		= []
 		self.raw_msg_functions	= []
 		self.mods				= []
-		self.queue				= 0
 		self.server = server
 		self.port	= port
 		self.socket	= socket.socket()
@@ -43,6 +42,7 @@ class IrcBot:
 	
 	def sendMessage(self, message):
 		self.socket.send(str('PRIVMSG ' + self.channel + ' :'+ message + '\r\n').encode('UTF-8'))
+		print('SENT:  ' + message)
 		self.queue = self.queue + 1
 	
 	def sendRawMessage(self, message):
@@ -67,9 +67,8 @@ class IrcBot:
 				msg = IrcMsg.IrcMsg(data)
 				if msg.type == 'PRIVMSG':
 					for msg_handler in self.msg_handlers:
-						for key in msg_handler.msgs:
-							if key.find(key) != -1:
-								msg_handler.function(msg.type, msg.body, msg.nick)
+						if msg.body.find(msg_handler.msg) != -1:
+							msg_handler.function(msg.type, msg.body, msg.nick)
 				elif msg.type == 'MODE':
 					if msg.mode == '+o':
 						if msg.nick not in self.mods:
