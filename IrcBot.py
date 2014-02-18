@@ -1,7 +1,21 @@
 import socket
 import threading
-import MsgHandler
-import IrcMsg
+
+class IrcMsg:
+	def __init__(self, data):
+		self.type = data.split(' ')[1]
+		if self.type == 'PRIVMSG':
+			self.body = data.split(':')[2][:-2]
+			self.nick = data.split(':')[1].split('!')[0].strip()
+		elif self.type == 'MODE':
+			self.channel 	= data.split(' ')[2]
+			self.mode		= data.split(' ')[3]
+			self.nick		= data.split(' ')[4][:-2]
+
+class MsgHandler:
+	def __init__(self, function, msg):
+		self.function 	= function
+		self.msg		= msg
 
 class IrcBot:
 	def __init__(self, server, port):
@@ -35,7 +49,7 @@ class IrcBot:
 
 		
 	def addMsgHandler(self, function, msg):
-		self.msg_handlers.append(MsgHandler.MsgHandler(function, msg))
+		self.msg_handlers.append(MsgHandler(function, msg))
 
 	def addRawMsgFunction(self, function):
 		self.raw_msg_functions.append(function)
@@ -43,7 +57,6 @@ class IrcBot:
 	def sendMessage(self, message):
 		self.socket.send(str('PRIVMSG ' + self.channel + ' :'+ message + '\r\n').encode('UTF-8'))
 		print('SENT:  ' + message)
-		self.queue = self.queue + 1
 	
 	def sendRawMessage(self, message):
 		self.socket.send(message.encode('UTF-8'))
@@ -64,7 +77,7 @@ class IrcBot:
 			if(data != "PING\r\n"):
 				for raw_msg_function in self.raw_msg_functions:
 					raw_msg_function(data)
-				msg = IrcMsg.IrcMsg(data)
+				msg = IrcMsg(data)
 				if msg.type == 'PRIVMSG':
 					for msg_handler in self.msg_handlers:
 						if msg.body.find(msg_handler.msg) != -1:
