@@ -6,6 +6,10 @@ if bot.login('EldhBot', 'oauth:ipm5kf729ao4y15tq27si9oix2ft35n') == True:
 	
 	def FrankerZ(msgtype, msg, nick):
 		bot.sendMessage('FrankerZ')
+	
+	def hello(msgtype, msg, nick):
+		bot.sendMessage('Hello ' + nick)
 
+	bot.addMsgHandler(hello, '!Hello')
 	bot.addMsgHandler(FrankerZ, 'FrankerZ')
 	bot.run()	

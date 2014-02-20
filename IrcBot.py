@@ -6,7 +6,11 @@ class IrcMsg:
 		self.type = data.split(' ')[1]
 		if self.type == 'PRIVMSG':
 			self.body = data.split(':')[2][:-2]
-			self.nick = data.split(':')[1].split('!')[0].strip()
+			self.nick = data.split(':')[1].split('!')[0]
+		elif self.type == 'JOIN':
+			self.nick = data.split(':')[1].split('!')[0]
+		elif self.type == 'PART':
+			self.nick = data.split(':')[1].split('!')[0]
 		elif self.type == 'MODE':
 			self.channel 	= data.split(' ')[2]
 			self.mode		= data.split(' ')[3]
@@ -22,6 +26,7 @@ class IrcBot:
 		self.msg_handlers 		= []
 		self.raw_msg_functions	= []
 		self.mods				= []
+		self.users				= []
 		self.server = server
 		self.port	= port
 		self.socket	= socket.socket()
@@ -79,16 +84,24 @@ class IrcBot:
 					raw_msg_function(data)
 				msg = IrcMsg(data)
 				if msg.type == 'PRIVMSG':
+					if msg.nick not in self.users:
+						self.users.append(msg.nick)
 					for msg_handler in self.msg_handlers:
-						if msg.body.find(msg_handler.msg) != -1:
+						if msg.body == msg_handler.msg:
 							msg_handler.function(msg.type, msg.body, msg.nick)
+				elif msg.type == 'JOIN':
+					if msg.nick not in  self.users:
+						self.users.append(msg.nick)
+				elif msg.type == 'PART':
+					if msg.nick in self.users:
+						list(filter(msg.nick.__ne__, self.users))
 				elif msg.type == 'MODE':
 					if msg.mode == '+o':
 						if msg.nick not in self.mods:
 							self.mods.append(msg.nick)
 					elif msg.mode == '-o':
 						if msg.nick in self.mods:
-							list(filter((msg.nick).__ne__, self.mods))
+							list(filter(msg.nick.__ne__, self.mods))
 			else:
 				print('ping')
 				self.socket.send(str(data.replace('PING', 'PONG')).encode('UTF-8'))
