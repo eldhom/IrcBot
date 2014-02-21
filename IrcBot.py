@@ -91,13 +91,17 @@ class IrcBot:
 							msg_handler.function(msg.type, msg.body, msg.nick)
 				elif msg.type == 'JOIN':
 					if msg.nick not in  self.users:
+						print(msg.nick + ' joined')
 						self.users.append(msg.nick)
 				elif msg.type == 'PART':
 					if msg.nick in self.users:
+						print(msg.nick + ' parted')
 						list(filter(msg.nick.__ne__, self.users))
 				elif msg.type == 'MODE':
+					print('Modechange')
 					if msg.mode == '+o':
 						if msg.nick not in self.mods:
+							print(msg.nick + ' is now mod')
 							self.mods.append(msg.nick)
 					elif msg.mode == '-o':
 						if msg.nick in self.mods:
