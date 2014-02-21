@@ -65,7 +65,7 @@ class IrcBot:
 		while self._loggedin:
 			data = str(self.socket.recv(4096), 'UTF-8')
 			print(data)
-			if not data.find("PRIVMSG") == -1:
+			if data.find("PRIVMSG") != -1:
 				try:
 					IRC_PRIVMSG_Information = [
 						data.split(':')[1].split('!')[0], #nick
