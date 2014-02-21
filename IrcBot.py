@@ -1,20 +1,6 @@
 import socket
 import threading
 
-class IrcMsg:
-	def __init__(self, data):
-		self.type = data.split(' ')[1]
-		if self.type == 'PRIVMSG':
-			self.body = data.split(':')[2][:-2]
-			self.nick = data.split(':')[1].split('!')[0]
-		elif self.type == 'JOIN':
-			self.nick = data.split(':')[1].split('!')[0]
-		elif self.type == 'PART':
-			self.nick = data.split(':')[1].split('!')[0]
-		elif self.type == 'MODE':
-			self.channel 	= data.split(' ')[2]
-			self.mode		= data.split(' ')[3]
-			self.nick		= data.split(' ')[4][:-2]
 
 class MsgHandler:
 	def __init__(self, function, msg):
@@ -79,33 +65,17 @@ class IrcBot:
 		while self._loggedin:
 			data = str(self.socket.recv(4096), 'UTF-8')
 			print(data)
-			if(data != "PING\r\n"):
-				for raw_msg_function in self.raw_msg_functions:
-					raw_msg_function(data)
-				msg = IrcMsg(data)
-				if msg.type == 'PRIVMSG':
-					if msg.nick not in self.users:
-						self.users.append(msg.nick)
-					for msg_handler in self.msg_handlers:
-						if msg.body == msg_handler.msg:
-							msg_handler.function(msg.type, msg.body, msg.nick)
-				elif msg.type == 'JOIN':
-					if msg.nick not in  self.users:
-						print(msg.nick + ' joined')
-						self.users.append(msg.nick)
-				elif msg.type == 'PART':
-					if msg.nick in self.users:
-						print(msg.nick + ' parted')
-						list(filter(msg.nick.__ne__, self.users))
-				elif msg.type == 'MODE':
-					print('Modechange')
-					if msg.mode == '+o':
-						if msg.nick not in self.mods:
-							print(msg.nick + ' is now mod')
-							self.mods.append(msg.nick)
-					elif msg.mode == '-o':
-						if msg.nick in self.mods:
-							list(filter(msg.nick.__ne__, self.mods))
-			else:
-				print('ping')
-				self.socket.send(str(data.replace('PING', 'PONG')).encode('UTF-8'))
+			if not data.find("PRIVMSG") == -1:
+				try:
+					IRC_PRIVMSG_Information = [
+						data.split(':')[1].split('!')[0], #nick
+						data.split('!')[1].split('@')[0], #user
+						data.split('@')[1].split(' ')[0], #host
+						data.split(' ')[2], #channel
+						":".join(data.split(':')[2:]),
+						True]
+					if not IRC_PRIVMSG_Information[3][0] == '#':
+						IRC_PRIVMSG_Information[5] = False
+				except Exception as Error:
+					 print("Error: " + Error)
+				print(IRC_PRIVMSG_Information)
