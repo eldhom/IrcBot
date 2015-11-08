@@ -1,16 +1,20 @@
 import IrcBot
+import IrcConnection
 
-bot = IrcBot.IrcBot('irc.twitch.tv', 6667)
-if bot.login('EldhBot', 'oauth:') == True:
-	bot.joinChannel('#eldhom')
-	
-	def FrankerZ(msgtype, msg, nick):
-		if bot.isMod(nick):
-			bot.sendMessage('FrankerZ')
-	
-	def hello(msgtype, msg, nick):
-		bot.sendMessage('Hello ' + nick)
+f = open('pass.txt')
+password = f.read()
+f.close()
+bot = IrcBot.IrcBot()
 
-	bot.addMsgHandler(hello, '!Hello')
-	bot.addMsgHandler(FrankerZ, 'FrankerZ')
-	bot.run()	
+whisperCon = IrcConnection.IrcConnection('199.9.253.119', 6667)
+whisperCon.login('Vassast', password)
+whisperCon.sendMessage('CAP REQ :twitch.tv/commands')
+
+channelCon = IrcConnection.IrcConnection('irc.twitch.tv', 6667)
+channelCon.login('Vassast', password)
+channelCon.joinChannel('#lobosjr')
+
+bot.addConnection(whisperCon)
+bot.addConnection(channelCon)
+
+bot.run()
