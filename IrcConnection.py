@@ -73,7 +73,7 @@ class IrcConnection(threading.Thread):
 	
 	def run(self):
 		self._messages 	= list()
-		self.resetTime()
+		self.resetPingTime()
 		while self._loggedIn:
 			try:
 				data = str(self._socket.recv(4096), 'UTF-8')

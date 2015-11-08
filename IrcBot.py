@@ -1,6 +1,7 @@
 import unicodedata
 import IrcConnection
-
+import time
+import datetime
 
 
 class IrcBot:
@@ -26,6 +27,9 @@ class IrcBot:
 						if data[1] == 'PRIVMSG':
 							nick = data[0][1:].split('!', 1)[0]
 							try:
+								timestamp = time.time()
+								timestamp = datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M:%S')
+								print('[' + timestamp + '] ', end='')
 								print(data[2][0] + ' ', end='')
 								print(nick, end='')							
 								print(': ', end='')
