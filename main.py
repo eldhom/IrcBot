@@ -1,5 +1,8 @@
 import IrcBot
 import IrcConnection
+import WhisperLog
+import WolfpackRPGEngine
+import OutputHandler
 
 f = open('pass.txt')
 password = f.read()
@@ -13,6 +16,10 @@ whisperCon.sendMessage('CAP REQ :twitch.tv/commands')
 channelCon = IrcConnection.IrcConnection('irc.twitch.tv', 6667)
 channelCon.login('Vassast', password)
 channelCon.joinChannel('#lobosjr')
+
+bot.addMessageHandler(WhisperLog.WhisperLog('wlog.txt'))
+bot.addMessageHandler(WolfpackRPGEngine.WolfpackRPGEngine())
+bot.addMessageHandler(OutputHandler.OutputHandler())
 
 bot.addConnection(whisperCon)
 bot.addConnection(channelCon)
