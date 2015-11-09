@@ -19,7 +19,7 @@ class OutputHandler(MessageHandler.MessageHandler):
 				timestamp = datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M:%S')
 				print('[' + timestamp + '] ', end='')	#timestamp
 				print(data[2][0] + ' ', end='') 		#channel
-				print(nick + ': ', end='')						#nick
+				print(nick + ': ', end='')				#nick
 				print(data[2][1], end='')				#message
 			except UnicodeEncodeError:
 				print(unicodedata.normalize('NFKD', data[3]).encode('ascii', 'ignore'), end='')
