@@ -7,7 +7,6 @@ import unicodedata
 class OutputHandler(MessageHandler.MessageHandler):
 	def __init_():
 		super().__init__()
-		pass
 	
 	def update(self, data):	
 		if data[1] == 'PRIVMSG' or data[1] == 'WHISPER':

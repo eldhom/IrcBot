@@ -13,6 +13,7 @@ class WolfpackRPGEngine(MessageHandler.MessageHandler):
 		self._startTime			= time.time()
 		self._endTime			= 0
 		self._level				= 0
+		self._coins				= 0
 		
 		self._inQueueMessage = [
 			'You have been placed in the Group Finder queue.\r\n',
@@ -41,49 +42,53 @@ class WolfpackRPGEngine(MessageHandler.MessageHandler):
 			if nick == 'lobotjr':
 				if message.find('You are a Level') != -1:
 					self._level = int(message.split()[4])
+				if message.find('You have:') != -1:
+					self._coins = int(message.split()[2])
 					
-				if not self._queued:
-					for line in self._inQueueMessage:
-						if message.find(line) != -1:
-							self._queued = True
-				else:
-					for line in self._removedFromQueueMessage:
-						if message.find(line) != -1:
-							self._queued = False
+				if self.canJoinDungeon():
+					if not self._queued:
+						for line in self._inQueueMessage:
+							if message.find(line) != -1:
+								self._queued = True
+					else:
+						for line in self._removedFromQueueMessage:
+							if message.find(line) != -1:
+								self._queued = False
 
-				if not self._inParty:
-					for line in self._inPartyMessage:
-						if message.find(line) != -1:
-							self._inParty = True
-				else:
-					for line in self._leftPartyMessage:
-						if message.find(line) != -1:
-							self._inParty = False
-							self._isLeader = False
+					if not self._inParty:
+						for line in self._inPartyMessage:
+							if message.find(line) != -1:
+								self._inParty = True
+					else:
+						for line in self._leftPartyMessage:
+							if message.find(line) != -1:
+								self._inParty = False
+								self._isLeader = False
 				
-				if not self._inDungeon:
-					if message.find('Successfully initiated') != -1:
-						self._inDungeon = True
-				else:
-					if message.find('Dungeon complete.') != -1:
-						self._inDungeon = False
-						if self._isLeader:
-							self.addMessage(('PRIVMSG', '#jtv :/w lobotjr !start 1'))
+					if not self._inDungeon:
+						if message.find('Successfully initiated') != -1:
+							self._inDungeon = True
+							self._coins -= 50+10*(self._level-3)
+					else:
+						if message.find('Dungeon complete.') != -1:
+							self._inDungeon = False
+							if self._isLeader:
+								self.addMessage(('PRIVMSG', '#jtv :/w lobotjr !start 1'))
 
-				if message.find('You are the party leader. Whisper me \'!start\' to begin!\r\n') != -1:
-					self._isLeader = True
-					self.addMessage(('PRIVMSG', '#jtv :/w lobotjr !start ' + self.getRecDungeon()))
+					if message.find('You are the party leader. Whisper me \'!start\' to begin!\r\n') != -1:
+						self._isLeader = True
+						self.addMessage(('PRIVMSG', '#jtv :/w lobotjr !start ' + self.getRecDungeon()))
 			
-				if not self._queued and not self._inParty:
-					self.addMessage(('PRIVMSG', '#jtv :/w lobotjr !queue ' + self.getRecDungeon()))
+					if not self._queued and not self._inParty:
+						self.addMessage(('PRIVMSG', '#jtv :/w lobotjr !queue ' + self.getRecDungeon()))
 				
 
 		self._endTime = time.time()
 		self._checkLevelTimer -= self._endTime - self._startTime
 		self._startTime = self._endTime
 		if self._checkLevelTimer <= 0:
-			self.addMessage(('PRIVMSG', '#jtv :/w lobotjr !xp'))
-			self._checkLevelTimer = 120
+			self.addMessage(('PRIVMSG', '#jtv :/w lobotjr !stats'))
+			self._checkLevelTimer = 1800
 	
 	def getRecDungeon(self):
 		if self._level == 3:
@@ -100,3 +105,10 @@ class WolfpackRPGEngine(MessageHandler.MessageHandler):
 			return '6'
 		else:
 			return '7'
+	
+	def canJoinDungeon(self):
+		if self._level == 0:
+			return False
+		if self._coins > 50 + 10*(self._level -3):
+			return True
+	

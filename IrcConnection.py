@@ -80,5 +80,3 @@ class IrcConnection(threading.Thread):
 				self._messages.append(self.parseData(data))
 			except (socket.timeout, Exception):
 				continue
-
-		

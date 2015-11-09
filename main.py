@@ -3,6 +3,7 @@ import IrcConnection
 import WhisperLog
 import WolfpackRPGEngine
 import OutputHandler
+import PingHandler
 
 f = open('pass.txt')
 password = f.read()
@@ -20,6 +21,7 @@ channelCon.joinChannel('#lobosjr')
 bot.addMessageHandler(WhisperLog.WhisperLog('wlog.txt'))
 bot.addMessageHandler(WolfpackRPGEngine.WolfpackRPGEngine())
 bot.addMessageHandler(OutputHandler.OutputHandler())
+bot.addMessageHandler(PingHandler.PingHandler())
 
 bot.addConnection(whisperCon)
 bot.addConnection(channelCon)
