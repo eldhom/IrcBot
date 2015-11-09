@@ -1,20 +1,27 @@
-
+import time
 import MessageHandler
 
 class WolfpackRPGEngine(MessageHandler.MessageHandler):
 	def __init__(self):
+		super().__init__()
 		self._queued 	= False
 		self._inParty	= False
 		self._isLeader	= False
 		self._inDungeon = False
+		self._messageQueue 		= list()
+		self._checkLevelTimer 	= 0
+		self._startTime			= time.time()
+		self._endTime			= 0
+		self._level				= 0
+		
 		self._inQueueMessage = [
 			'You have been placed in the Group Finder queue.\r\n',
 			'You are already queued in the Group Finder! Type !queuetime for more information.\r\n',
-			'You\'ve been matched for'
 		]
 		self._removedFromQueueMessage = [
 			'You were removed from the Group Finder.\r\n',
-			'Your party has been disbanded.\r\n'
+			'Your party has been disbanded.\r\n',
+			'You\'ve been matched for'
 		]
 		
 		self._inPartyMessage = [
@@ -26,14 +33,15 @@ class WolfpackRPGEngine(MessageHandler.MessageHandler):
 			'Your party has been disbanded.',
 			'You left the party.'
 		]
-		
-	def onMessage(self, data):
-		replyType 		= ''
-		replyMessage	= ''
+			
+	def update(self, data):
 		nick	= data[0].split('!', 1)[0]
 		message = data[2][1]
 		if data[1] == 'WHISPER':
 			if nick == 'lobotjr':
+				if message.find('You are a Level') != -1:
+					self._level = int(message.split()[4])
+					
 				if not self._queued:
 					for line in self._inQueueMessage:
 						if message.find(line) != -1:
@@ -60,17 +68,35 @@ class WolfpackRPGEngine(MessageHandler.MessageHandler):
 					if message.find('Dungeon complete.') != -1:
 						self._inDungeon = False
 						if self._isLeader:
-							replyType 		= 'PRIVMSG'
-							replyMessage	= '#jtv :/w lobotjr !start 1'
+							self.addMessage(('PRIVMSG', '#jtv :/w lobotjr !start 1'))
+
 				if message.find('You are the party leader. Whisper me \'!start\' to begin!\r\n') != -1:
 					self._isLeader = True
-					replyType 		= 'PRIVMSG'
-					replyMessage	= '#jtv :/w lobotjr !start 1'
-					
-
+					self.addMessage(('PRIVMSG', '#jtv :/w lobotjr !start ' + self.getRecDungeon()))
 			
 				if not self._queued and not self._inParty:
-					replyType		= 'PRIVMSG'
-					replyMessage 	= '#jtv :/w lobotjr !queue 1'
+					self.addMessage(('PRIVMSG', '#jtv :/w lobotjr !queue ' + self.getRecDungeon()))
+				
 
-		return replyType, replyMessage
+		self._endTime = time.time()
+		self._checkLevelTimer -= self._endTime - self._startTime
+		self._startTime = self._endTime
+		if self._checkLevelTimer <= 0:
+			self.addMessage(('PRIVMSG', '#jtv :/w lobotjr !xp'))
+			self._checkLevelTimer = 120
+	
+	def getRecDungeon(self):
+		if self._level == 3:
+			return '1'
+		elif self._level == 4:
+			return '2'
+		elif self._level == 5:
+			return '3'
+		elif self._level == 6:
+			return '4'
+		elif self._level == 7:
+			return '5'
+		elif self._level == 8:
+			return '6'
+		else:
+			return '7'

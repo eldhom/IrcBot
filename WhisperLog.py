@@ -3,6 +3,7 @@ import MessageHandler
 
 class WhisperLog(MessageHandler.MessageHandler):
 	def __init__(self, fileName):
+		super().__init__()
 		self._fileName		= fileName
 		self._uniqueLines 	= list()
 		try:
@@ -14,7 +15,7 @@ class WhisperLog(MessageHandler.MessageHandler):
 		except FileNotFoundError:
 			pass
 
-	def onMessage(self, data):
+	def update(self, data):
 		replyType 		= ''
 		replyMessage	= ''
 		if data[1] == 'WHISPER':
@@ -26,4 +27,3 @@ class WhisperLog(MessageHandler.MessageHandler):
 					f.write(message)
 			with open(self._fileName, 'a') as f:
 				f.write(message)
-		return replyType, replyMessage

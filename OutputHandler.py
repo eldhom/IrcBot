@@ -6,12 +6,10 @@ import unicodedata
 
 class OutputHandler(MessageHandler.MessageHandler):
 	def __init_():
+		super().__init__()
 		pass
 	
-	def onMessage(self, data):
-		replyType 		= ''
-		replyMessage	= ''
-		
+	def update(self, data):	
 		if data[1] == 'PRIVMSG' or data[1] == 'WHISPER':
 			nick = data[0].split('!', 1)[0]
 			try:
@@ -26,5 +24,4 @@ class OutputHandler(MessageHandler.MessageHandler):
 				print(': ', end='')
 				print(unicodedata.normalize('NFKD', data[2][1]).encode('ascii', 'ignore') + '\r\n', end='')
 		
-		return replyType, replyMessage
 		

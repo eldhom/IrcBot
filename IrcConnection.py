@@ -66,7 +66,7 @@ class IrcConnection(threading.Thread):
 		return self._messages.pop(0)
 
 	def resetPingTime(self):
-		self._time = time.time()
+		self._time = 120
 		
 	def connect(self):
 		pass

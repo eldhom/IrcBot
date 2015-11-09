@@ -2,10 +2,15 @@
 
 class MessageHandler:
 	def __init__(self):
-		pass
+		self._messageQueue = list()
 	
-	def onMessage(self, data):
-		replyType 		= False
-		replyMessage	= ''
+	def update(self, data):
+		pass
 		
-		return replyType, replyMessage
+	def addMessage(self, message):
+		self._messageQueue.append(message)
+		
+	def getMessage(self):
+		if not self._messageQueue:
+			return False
+		return self._messageQueue.pop(0)
