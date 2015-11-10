@@ -36,9 +36,9 @@ class WolfpackRPGEngine(MessageHandler.MessageHandler):
 		]
 			
 	def update(self, data):
-		nick	= data[0].split('!', 1)[0]
-		message = data[2][1]
 		if data[1] == 'WHISPER':
+			nick	= data[0].split('!', 1)[0]
+			message = data[2][1]
 			if nick == 'lobotjr':
 				if message.find('You are a Level') != -1:
 					self._level = int(message.split()[4])

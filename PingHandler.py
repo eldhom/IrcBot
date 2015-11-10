@@ -6,5 +6,5 @@ class PingHandler(MessageHandler.MessageHandler):
 		
 	def update(self, data):
 		if data[1] == 'PING':
-			self._addMessage(('PONG', data[2][0]))
-			print(PING)
+			self.addMessage(('PONG', data[2][0]))
+			print('PING')
