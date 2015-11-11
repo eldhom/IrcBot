@@ -8,7 +8,6 @@ class IrcBot:
 		self._connections 		= list()
 		self._messageHandlers	= list()
 		self._run 				= False
-		self._rpgEngine			= WolfpackRPGEngine.WolfpackRPGEngine()
 		
 	def addConnection(self, con):
 		self._connections.append(con)
