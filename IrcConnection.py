@@ -58,7 +58,9 @@ class IrcConnection(threading.Thread):
 		return prefix, command, args
 		
 	def sendMessage(self, message):
-		self._socket.send((message + '\r\n').encode('UTF-8'))
+		if message.find('\r\n') == -1:
+			message += '\r\n'
+		self._socket.send((message).encode('UTF-8'))
 	
 	def getData(self):
 		if not self._messages:

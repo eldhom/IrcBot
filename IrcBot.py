@@ -28,7 +28,7 @@ class IrcBot:
 							handler.update(data)
 							replyMessage = handler.getMessage()
 							if replyMessage:
-								print(replyMessage[0] + ' ' + replyMessage[1])
+								print('Sent message: ' + replyMessage[0] + ' ' + replyMessage[1])
 								con.sendMessage(replyMessage[0] + ' ' + replyMessage[1])
 			
 			for con in self._connections:
