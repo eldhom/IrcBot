@@ -1,5 +1,7 @@
-import time
+import Timer
 import MessageHandler
+import json
+import urllib.request
 
 class WolfpackRPGEngine(MessageHandler.MessageHandler):
 	def __init__(self):
@@ -9,9 +11,10 @@ class WolfpackRPGEngine(MessageHandler.MessageHandler):
 		self._isLeader	= False
 		self._inDungeon = False
 		self._messageQueue 		= list()
-		self._checkLevelTimer 	= 0
-		self._startTime			= time.time()
-		self._endTime			= 0
+		self._syncTimer	= Timer.Timer(0)
+		self._checkStreamTimer	= Timer.Timer(60)
+		self._updateCoinsTimer	= Timer.Timer()
+		self._streamLive		= False
 		self._level				= 0
 		self._coins				= 0
 		
@@ -40,42 +43,51 @@ class WolfpackRPGEngine(MessageHandler.MessageHandler):
 			nick	= data[0].split('!', 1)[0]
 			message = data[2][1]
 			if nick == 'lobotjr':
-				if message.find('You are a Level') != -1:
+				if 'You are a Level' in message:
 					self._level = int(message.split()[4])
-				if message.find('You have:') != -1:
+					self._syncTimer.start(7200)
+				if 'You have:' in message:
 					self._coins = int(message.split()[2])
+					self._syncTimer.start(7200)
+				
+				if 'DING!' in message:
+					self._level += 1
+						
+				if 'you\'ve earned' in message:
+					self._coins += int(message.split()[6])
 					
 				if self.canJoinDungeon():
 					if not self._queued:
 						for line in self._inQueueMessage:
-							if message.find(line) != -1:
+							if line in message:
 								self._queued = True
 					else:
 						for line in self._removedFromQueueMessage:
-							if message.find(line) != -1:
+							if line in message:
 								self._queued = False
 
 					if not self._inParty:
 						for line in self._inPartyMessage:
-							if message.find(line) != -1:
+							if line in message:
 								self._inParty = True
 					else:
 						for line in self._leftPartyMessage:
-							if message.find(line) != -1:
+							if line in message:
 								self._inParty = False
 								self._isLeader = False
 				
 					if not self._inDungeon:
-						if message.find('Successfully initiated') != -1:
+						if 'Successfully initiated' in message:
 							self._inDungeon = True
 							self._coins -= 50+10*(self._level-3)
 					else:
-						if message.find('Dungeon complete.') != -1:
+						if 'Dungeon complete.' in message:
 							self._inDungeon = False
 							if self._isLeader:
 								self.addMessage(('PRIVMSG', '#jtv :/w lobotjr !start 1'))
+					
 
-					if message.find('You are the party leader. Whisper me \'!start\' to begin!\r\n') != -1:
+					if 'You are the party leader. Whisper me \'!start\' to begin!\r\n' in message:
 						self._isLeader = True
 						self.addMessage(('PRIVMSG', '#jtv :/w lobotjr !start ' + self.getRecDungeon()))
 			
@@ -83,12 +95,33 @@ class WolfpackRPGEngine(MessageHandler.MessageHandler):
 						self.addMessage(('PRIVMSG', '#jtv :/w lobotjr !queue ' + self.getRecDungeon()))
 				
 
-		self._endTime = time.time()
-		self._checkLevelTimer -= self._endTime - self._startTime
-		self._startTime = self._endTime
-		if self._checkLevelTimer <= 0:
+		if self._syncTimer.isDone():
 			self.addMessage(('PRIVMSG', '#jtv :/w lobotjr !stats'))
-			self._checkLevelTimer = 1800
+			self._syncTimer.start(600)
+		if self._checkStreamTimer.isDone():
+			self._checkStream()
+			self._checkStreamTimer.start(60)
+		if self._streamLive and self._updateCoinsTimer.isDone():
+			self._updateCoins()
+			self._updateCoinsTimer.start(1800)
+			
+	def _checkStream(self):
+		html = ""
+		with urllib.request.urlopen('https://api.twitch.tv/kraken/streams/lobosjr') as response:
+			html = response.read().decode('utf-8')
+		
+		data = json.loads(html)
+		if data['stream']:
+			self._streamLive = True
+			self._updateCoinsTimer.start(1800)
+			print('Lobosjr went online \o/\r\n', end='')
+		if not data['stream'] and  self._streamLive:
+			self._streamLive = False
+			print('Stream went offline :(\r\n', end='')
+	
+	def _updateCoins(self):
+		self._coins += 3
+		print('Gained 3 coins')
 	
 	def getRecDungeon(self):
 		if self._level == 3:

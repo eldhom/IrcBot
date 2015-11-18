@@ -9,7 +9,7 @@ class OutputHandler(MessageHandler.MessageHandler):
 		super().__init__()
 	
 	def update(self, data):	
-		if data[1] == 'PRIVMSG' or data[1] == 'WHISPER':
+		if data[1] == 'WHISPER':
 			nick = data[0].split('!', 1)[0]
 			timestamp = time.time()
 			timestamp = datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M:%S')
